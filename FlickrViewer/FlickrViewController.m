@@ -7,10 +7,14 @@
 //
 
 #import "FlickrViewController.h"
+#import "PhotoDetailViewController.h"
 #import "PSRClassWichPerformsAsyncOperations.h"
 #import "PSRFlickrAPI.h"
 #import "PSRFlickrPhoto.h"
 #import "CollectionViewCell.h"
+
+
+static const int kNumberOfPhotosThatAreVisible = 6;
 
 
 @interface FlickrViewController ()
@@ -22,6 +26,7 @@
 
 @implementation FlickrViewController {
     NSMutableArray *_photos;
+    NSMutableArray *_parsedPhotosInfo;
 }
 
 - (void)viewDidLoad
@@ -47,6 +52,7 @@
 
 - (IBAction)showPhotos:(UIButton *)sender {
     _photos = [[NSMutableArray alloc]init];
+    _parsedPhotosInfo = [[NSMutableArray alloc]init];
     
     dispatch_queue_t mainQueue = dispatch_get_main_queue();
     dispatch_async(mainQueue, ^{
@@ -67,17 +73,23 @@
         if (!parsedPhoto){
             return;
         }
+        [_parsedPhotosInfo addObject:parsedPhoto];
+        
         NSData *photoData = [NSData dataWithContentsOfURL:[parsedPhoto highQualityURL]];
         
         dispatch_queue_t mainQueue = dispatch_get_main_queue();
         dispatch_async(mainQueue, ^{
             [_photos addObject:[UIImage imageWithData:photoData]];
             
+            NSLog(@"%@",_photos);
+            
             NSIndexPath *indexPath = [NSIndexPath indexPathForItem:_photos.count - 1 inSection:0];
             
-            CollectionViewCell *cell = (CollectionViewCell *)[self.collectionView cellForItemAtIndexPath:indexPath];
-            NSAssert(cell, @"Cell does not exist!");
-            cell.photo.image = _photos[indexPath.row];
+            if (indexPath.row < kNumberOfPhotosThatAreVisible) {
+                CollectionViewCell *cell = (CollectionViewCell *)[self.collectionView cellForItemAtIndexPath:indexPath];
+                NSAssert(cell, @"Cell does not exist!");
+                cell.photo.image = _photos[indexPath.row];
+            }
             
             [self showPhotosFromEnumerator:enumerator];
         });
@@ -113,17 +125,28 @@
 {
     CollectionViewCell *collectionCell = [self.collectionView dequeueReusableCellWithReuseIdentifier:@"Cell" forIndexPath:indexPath];
     
-//    NSLog(@"\nindexPath.row == %ld\n",(long)indexPath.row);
-//    
-//    if (indexPath.row < _photos.count) {
-//        collectionCell.photo.image = _photos[indexPath.row];
-//    }
+    if (collectionCell) {
+        if (indexPath.row > kNumberOfPhotosThatAreVisible - 1) {
+            collectionCell.photo.image = _photos[indexPath.row];
+        }
+    }
     
     return collectionCell;
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
-    [self performSegueWithIdentifier:@"ShowDetail" sender:nil];
+    [self performSegueWithIdentifier:@"ShowDetail" sender:indexPath];
+}
+
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    if ([segue.identifier isEqualToString:@"ShowDetail"]) {
+        NSIndexPath *path = sender;
+        NSParameterAssert(path);
+        
+        PhotoDetailViewController *controller = segue.destinationViewController;
+        controller.photoToShowDetail = _parsedPhotosInfo[path.row];
+        controller.imageToShow = _photos[path.row];
+    }
 }
 
 @end

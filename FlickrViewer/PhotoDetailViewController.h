@@ -8,6 +8,14 @@
 
 #import <UIKit/UIKit.h>
 
+@class PSRFlickrPhoto;
+
 @interface PhotoDetailViewController : UIViewController
+
+@property (weak, nonatomic) IBOutlet UIImageView *photo;
+@property (weak, nonatomic) IBOutlet UITextView *textView;
+
+@property (nonatomic, strong) PSRFlickrPhoto *photoToShowDetail;
+@property (nonatomic, strong) UIImage *imageToShow;
 
 @end
