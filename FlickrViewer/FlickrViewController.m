@@ -10,6 +10,7 @@
 #import "PSRClassWichPerformsAsyncOperations.h"
 #import "PSRFlickrAPI.h"
 #import "PSRFlickrPhoto.h"
+#import "CollectionViewCell.h"
 
 
 @interface FlickrViewController ()
@@ -19,12 +20,16 @@
 @end
 
 
-@implementation FlickrViewController
+@implementation FlickrViewController {
+    NSMutableArray *_photos;
+}
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    // Do any additional setup after loading the view.
+    
+    self.collectionView.dataSource = self;
+    self.collectionView.delegate = self;
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -41,6 +46,8 @@
 }
 
 - (IBAction)showPhotos:(UIButton *)sender {
+    _photos = [[NSMutableArray alloc]init];
+    
     PSRClassWichPerformsSomethingWithComplitionBlock *customClassWithComplition = [PSRClassWichPerformsSomethingWithComplitionBlock new];
     
     [customClassWithComplition performSomeOperationWithSearchOptions:self.searchOptions complition:^(id result) {
@@ -48,27 +55,23 @@
     }];
 }
 
-- (void)showPhotosFromEnumerator:(NSEnumerator *)enumarator {
+- (void)showPhotosFromEnumerator:(NSEnumerator *)enumerator {
     dispatch_queue_t downloadQueue = dispatch_queue_create("download queue", 0);
     dispatch_async(downloadQueue, ^{
-        NSLog(@"queue operation");
-        PSRFlickrPhoto *parsedPhoto = [enumarator nextObject];
+        PSRFlickrPhoto *parsedPhoto = [enumerator nextObject];
         if (!parsedPhoto){
             return;
         }
-        
         NSData *photoData = [NSData dataWithContentsOfURL:[parsedPhoto highQualityURL]];
-        
-        NSLog(@"image downloaded");
         
         dispatch_queue_t mainQueue = dispatch_get_main_queue();
         dispatch_async(mainQueue, ^{
+            [_photos addObject:[UIImage imageWithData:photoData]];
+            [self.collectionView reloadData];
             
-            self.photo.image = [UIImage imageWithData:photoData];
-            [self showPhotosFromEnumerator:enumarator];
+            [self showPhotosFromEnumerator:enumerator];
         });
     });
-    NSLog(@"after calling dispatch_async");
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
@@ -91,5 +94,26 @@
         self.searchOptions.tags = @[self.tagTextField.text];
     }
 }
+
+#pragma mark - Collection View Data Source -
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
+    return self.searchOptions.itemsLimit;
+}
+
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
+    return 1;
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    CollectionViewCell *collectionCell = [self.collectionView dequeueReusableCellWithReuseIdentifier:@"Cell" forIndexPath:indexPath];
+    if (indexPath.row < _photos.count) {
+        collectionCell.photo.image = _photos[indexPath.row];
+    }
+    
+    return collectionCell;
+}
+
 
 @end

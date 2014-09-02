@@ -8,11 +8,11 @@
 
 #import <UIKit/UIKit.h>
 
-@interface FlickrViewController : UIViewController <UITextFieldDelegate>
+@interface FlickrViewController : UIViewController <UITextFieldDelegate, UICollectionViewDataSource, UICollectionViewDelegate>
 
-@property (weak, nonatomic) IBOutlet UIImageView *photo;
 @property (weak, nonatomic) IBOutlet UITextField *tagTextField;
 @property (weak, nonatomic) IBOutlet UITextField *numberOfPhotosTextField;
+@property (weak, nonatomic) IBOutlet UICollectionView *collectionView;
 
 - (IBAction)showPhotos:(UIButton *)sender;
 
