@@ -1,5 +1,5 @@
 //
-//  CollectionViewCell.h
+//  PhotoDetailViewController.h
 //  FlickrViewer
 //
 //  Created by Ivan Magda on 02.09.14.
@@ -8,8 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface CollectionViewCell : UICollectionViewCell
-
-@property (strong, nonatomic) IBOutlet UIImageView *photo;
+@interface PhotoDetailViewController : UIViewController
 
 @end

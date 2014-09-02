@@ -48,6 +48,11 @@
 - (IBAction)showPhotos:(UIButton *)sender {
     _photos = [[NSMutableArray alloc]init];
     
+    dispatch_queue_t mainQueue = dispatch_get_main_queue();
+    dispatch_async(mainQueue, ^{
+        [self.collectionView reloadData];
+    });
+    
     PSRClassWichPerformsSomethingWithComplitionBlock *customClassWithComplition = [PSRClassWichPerformsSomethingWithComplitionBlock new];
     
     [customClassWithComplition performSomeOperationWithSearchOptions:self.searchOptions complition:^(id result) {
@@ -67,7 +72,12 @@
         dispatch_queue_t mainQueue = dispatch_get_main_queue();
         dispatch_async(mainQueue, ^{
             [_photos addObject:[UIImage imageWithData:photoData]];
-            [self.collectionView reloadData];
+            
+            NSIndexPath *indexPath = [NSIndexPath indexPathForItem:_photos.count - 1 inSection:0];
+            
+            CollectionViewCell *cell = (CollectionViewCell *)[self.collectionView cellForItemAtIndexPath:indexPath];
+            NSAssert(cell, @"Cell does not exist!");
+            cell.photo.image = _photos[indexPath.row];
             
             [self showPhotosFromEnumerator:enumerator];
         });
@@ -95,25 +105,25 @@
     }
 }
 
-#pragma mark - Collection View Data Source -
-
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
     return self.searchOptions.itemsLimit;
-}
-
-- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
-    return 1;
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
     CollectionViewCell *collectionCell = [self.collectionView dequeueReusableCellWithReuseIdentifier:@"Cell" forIndexPath:indexPath];
-    if (indexPath.row < _photos.count) {
-        collectionCell.photo.image = _photos[indexPath.row];
-    }
+    
+//    NSLog(@"\nindexPath.row == %ld\n",(long)indexPath.row);
+//    
+//    if (indexPath.row < _photos.count) {
+//        collectionCell.photo.image = _photos[indexPath.row];
+//    }
     
     return collectionCell;
 }
 
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
+    [self performSegueWithIdentifier:@"ShowDetail" sender:nil];
+}
 
 @end
