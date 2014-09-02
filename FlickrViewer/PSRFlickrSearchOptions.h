@@ -18,6 +18,7 @@ typedef NS_ENUM(int, PSRFLickrContentType)
 };
 
 @interface PSRFlickrSearchOptions : NSObject
+
 @property (nonatomic, strong) NSArray *tags;
 @property (nonatomic) PSRFLickrContentType contentType;
 @property (nonatomic) CLLocationCoordinate2D coordinate;

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		501F1FF419B57E9600EECE15 /* FlickrViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 501F1FF319B57E9600EECE15 /* FlickrViewController.m */; };
 		50D3E5CE19B49BFB00684C90 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 50D3E5CD19B49BFB00684C90 /* Foundation.framework */; };
 		50D3E5D019B49BFB00684C90 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 50D3E5CF19B49BFB00684C90 /* CoreGraphics.framework */; };
 		50D3E5D219B49BFB00684C90 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 50D3E5D119B49BFB00684C90 /* UIKit.framework */; };
@@ -37,6 +38,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		501F1FF219B57E9600EECE15 /* FlickrViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FlickrViewController.h; sourceTree = "<group>"; };
+		501F1FF319B57E9600EECE15 /* FlickrViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FlickrViewController.m; sourceTree = "<group>"; };
 		50D3E5CA19B49BFB00684C90 /* FlickrViewer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FlickrViewer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		50D3E5CD19B49BFB00684C90 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		50D3E5CF19B49BFB00684C90 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -124,6 +127,8 @@
 			children = (
 				50D3E5DC19B49BFB00684C90 /* PSRAppDelegate.h */,
 				50D3E5DD19B49BFB00684C90 /* PSRAppDelegate.m */,
+				501F1FF219B57E9600EECE15 /* FlickrViewController.h */,
+				501F1FF319B57E9600EECE15 /* FlickrViewController.m */,
 				50D3E5DF19B49BFB00684C90 /* Main.storyboard */,
 				50D3E5E519B49BFB00684C90 /* Images.xcassets */,
 				50D3E5D419B49BFB00684C90 /* Supporting Files */,
@@ -274,6 +279,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				501F1FF419B57E9600EECE15 /* FlickrViewController.m in Sources */,
 				50D3E5DE19B49BFB00684C90 /* PSRAppDelegate.m in Sources */,
 				50D3E60C19B49C4900684C90 /* PSRFlickrPhoto.m in Sources */,
 				50D3E60A19B49C4900684C90 /* PSRClassWichPerformsAsyncOperations.m in Sources */,
@@ -484,6 +490,7 @@
 				50D3E5FE19B49BFB00684C90 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		50D3E5FF19B49BFB00684C90 /* Build configuration list for PBXNativeTarget "FlickrViewerTests" */ = {
 			isa = XCConfigurationList;
@@ -492,6 +499,7 @@
 				50D3E60119B49BFB00684C90 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

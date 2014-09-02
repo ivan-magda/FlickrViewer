@@ -8,11 +8,12 @@
 
 #import <Foundation/Foundation.h>
 
+@class PSRFlickrSearchOptions;
 
 typedef void(^PSRComplitionBlock)(id result);
 
 @interface PSRClassWichPerformsSomethingWithComplitionBlock: NSObject
 
-- (void)performSomeOperationWithComplition:(PSRComplitionBlock)complition;
+- (void)performSomeOperationWithSearchOptions:(PSRFlickrSearchOptions *)options complition:(PSRComplitionBlock)complition;
 
 @end
