@@ -29,6 +29,8 @@ static const int kNumberOfPhotosThatAreVisible = 6;
     NSMutableArray *_parsedPhotosInfo;
 }
 
+#pragma mark - View Controller Life Cycle -
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -49,6 +51,8 @@ static const int kNumberOfPhotosThatAreVisible = 6;
                       @"owner_name"];
     self.searchOptions = options;
 }
+
+#pragma mark - Custom methods -
 
 - (IBAction)showPhotos:(UIButton *)sender {
     _photos = [[NSMutableArray alloc]init];
@@ -87,14 +91,24 @@ static const int kNumberOfPhotosThatAreVisible = 6;
             
             if (indexPath.row < kNumberOfPhotosThatAreVisible) {
                 CollectionViewCell *cell = (CollectionViewCell *)[self.collectionView cellForItemAtIndexPath:indexPath];
-                NSAssert(cell, @"Cell does not exist!");
+                //NSAssert(cell, @"Cell does not exist!");
                 cell.photo.image = _photos[indexPath.row];
-            }
-            
+            }             
             [self showPhotosFromEnumerator:enumerator];
         });
     });
 }
+
+- (void)configurateSearchOptionsWithTextFiled:(UITextField *)textField {
+    if (textField.keyboardType == UIKeyboardTypeNumberPad) {
+        NSString *itemsLimit = self.numberOfPhotosTextField.text;
+        self.searchOptions.itemsLimit = [itemsLimit intValue];
+    } else {
+        self.searchOptions.tags = @[self.tagTextField.text];
+    }
+}
+
+#pragma mark - Text Field Delegate -
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
     [textField resignFirstResponder];
@@ -108,14 +122,7 @@ static const int kNumberOfPhotosThatAreVisible = 6;
     [self configurateSearchOptionsWithTextFiled:textField];
 }
 
-- (void)configurateSearchOptionsWithTextFiled:(UITextField *)textField {
-    if (textField.keyboardType == UIKeyboardTypeNumberPad) {
-        NSString *itemsLimit = self.numberOfPhotosTextField.text;
-        self.searchOptions.itemsLimit = [itemsLimit intValue];
-    } else {
-        self.searchOptions.tags = @[self.tagTextField.text];
-    }
-}
+#pragma mark - Collection View Data Source -
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
     return self.searchOptions.itemsLimit;
@@ -126,17 +133,26 @@ static const int kNumberOfPhotosThatAreVisible = 6;
     CollectionViewCell *collectionCell = [self.collectionView dequeueReusableCellWithReuseIdentifier:@"Cell" forIndexPath:indexPath];
     
     if (collectionCell) {
-        if (indexPath.row > kNumberOfPhotosThatAreVisible - 1) {
+        
+        NSLog(@"\nindexPath.row == %ld\n", (long)indexPath.row);
+        
+        if ((indexPath.row > kNumberOfPhotosThatAreVisible - 1) && _photos[indexPath.row]) {
+            NSLog(@"\nAdding photo to up 6...\n");
+            collectionCell.photo.image = _photos[indexPath.row];
+        } else if ((indexPath.row < kNumberOfPhotosThatAreVisible) && _photos.count != 0) {
             collectionCell.photo.image = _photos[indexPath.row];
         }
     }
-    
     return collectionCell;
 }
+
+#pragma mark - Collection View Delegate -
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
     [self performSegueWithIdentifier:@"ShowDetail" sender:indexPath];
 }
+
+#pragma mark - Navigation -
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
     if ([segue.identifier isEqualToString:@"ShowDetail"]) {
