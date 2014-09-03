@@ -2,3 +2,7 @@
 FlickrViewer.xcodeproj/project.xcworkspace/xcuserdata/vanyaland.xcuserdatad/WorkspaceSettings.xcsettings
 
 *.xcbkptlist
+
+FlickrViewer.xcodeproj/project.xcworkspace/xcshareddata/FlickrViewer.xccheckout
+
+FlickrViewer/Base.lproj/Main.storyboard
