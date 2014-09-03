@@ -122,6 +122,20 @@ static const int kNumberOfPhotosThatAreVisible = 6;
     [self configurateSearchOptionsWithTextFiled:textField];
 }
 
+- (BOOL)showNextPhotosAfterSixStartersPhotos:(NSIndexPath *)indexPath {
+    if ((indexPath.row > kNumberOfPhotosThatAreVisible - 1) && _photos[indexPath.row])
+        return YES;
+    else
+        return NO;
+}
+
+- (BOOL)showPreviousPhotos:(NSIndexPath *)indexPath {
+    if ((indexPath.row < kNumberOfPhotosThatAreVisible) && _photos.count != 0)
+        return YES;
+    else
+        return NO;
+}
+
 #pragma mark - Collection View Data Source -
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
@@ -133,13 +147,12 @@ static const int kNumberOfPhotosThatAreVisible = 6;
     CollectionViewCell *collectionCell = [self.collectionView dequeueReusableCellWithReuseIdentifier:@"Cell" forIndexPath:indexPath];
     
     if (collectionCell) {
-        
         NSLog(@"\nindexPath.row == %ld\n", (long)indexPath.row);
         
-        if ((indexPath.row > kNumberOfPhotosThatAreVisible - 1) && _photos[indexPath.row]) {
+        if ([self showNextPhotosAfterSixStartersPhotos:indexPath]) {
             NSLog(@"\nAdding photo to up 6...\n");
             collectionCell.photo.image = _photos[indexPath.row];
-        } else if ((indexPath.row < kNumberOfPhotosThatAreVisible) && _photos.count != 0) {
+        } else if ([self showPreviousPhotos:indexPath]) {
             collectionCell.photo.image = _photos[indexPath.row];
         }
     }
