@@ -52,9 +52,11 @@ static const int kNumberOfPhotosThatAreVisible = 6;
     self.searchOptions = options;
 }
 
-#pragma mark - Custom methods -
+#pragma mark - Processing of requests for photos -
 
 - (IBAction)showPhotos:(UIButton *)sender {
+    [self configurateSearchOptions];
+    
     _photos = [[NSMutableArray alloc]init];
     _parsedPhotosInfo = [[NSMutableArray alloc]init];
     
@@ -85,13 +87,12 @@ static const int kNumberOfPhotosThatAreVisible = 6;
         dispatch_async(mainQueue, ^{
             [_photos addObject:[UIImage imageWithData:photoData]];
             
-            NSLog(@"%@",_photos);
+            NSLog(@"images downloaded %lu",(unsigned long)_photos.count);
             
             NSIndexPath *indexPath = [NSIndexPath indexPathForItem:_photos.count - 1 inSection:0];
             
             if (indexPath.row < kNumberOfPhotosThatAreVisible) {
                 CollectionViewCell *cell = (CollectionViewCell *)[self.collectionView cellForItemAtIndexPath:indexPath];
-                //NSAssert(cell, @"Cell does not exist!");
                 cell.photo.image = _photos[indexPath.row];
             }             
             [self showPhotosFromEnumerator:enumerator];
@@ -99,28 +100,24 @@ static const int kNumberOfPhotosThatAreVisible = 6;
     });
 }
 
-- (void)configurateSearchOptionsWithTextFiled:(UITextField *)textField {
-    if (textField.keyboardType == UIKeyboardTypeNumberPad) {
-        NSString *itemsLimit = self.numberOfPhotosTextField.text;
-        self.searchOptions.itemsLimit = [itemsLimit intValue];
-    } else {
-        self.searchOptions.tags = @[self.tagTextField.text];
-    }
+- (void)configurateSearchOptions {
+    NSString *itemsLimit = self.numberOfPhotosTextField.text;
+    self.searchOptions.itemsLimit = [itemsLimit intValue];
+    
+    NSArray *tags = [self.tagTextField.text componentsSeparatedByCharactersInSet:[NSCharacterSet punctuationCharacterSet]];
+    self.searchOptions.tags = tags;
+    NSLog(@"\ntags: %@ \n", tags);
 }
 
 #pragma mark - Text Field Delegate -
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
     [textField resignFirstResponder];
-    [self configurateSearchOptionsWithTextFiled:textField];
     
     return YES;
 }
 
-- (void)textFieldDidEndEditing:(UITextField *)textField {
-    [textField resignFirstResponder];
-    [self configurateSearchOptionsWithTextFiled:textField];
-}
+#pragma mark - check the status of cell -
 
 - (BOOL)showNextPhotosAfterSixStartersPhotos:(NSIndexPath *)indexPath {
     if ((indexPath.row > kNumberOfPhotosThatAreVisible - 1) && _photos[indexPath.row])
@@ -145,16 +142,18 @@ static const int kNumberOfPhotosThatAreVisible = 6;
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
     CollectionViewCell *collectionCell = [self.collectionView dequeueReusableCellWithReuseIdentifier:@"Cell" forIndexPath:indexPath];
+
+    NSParameterAssert(collectionCell);
     
-    if (collectionCell) {
-        NSLog(@"\nindexPath.row == %ld\n", (long)indexPath.row);
-        
-        if ([self showNextPhotosAfterSixStartersPhotos:indexPath]) {
-            NSLog(@"\nAdding photo to up 6...\n");
-            collectionCell.photo.image = _photos[indexPath.row];
-        } else if ([self showPreviousPhotos:indexPath]) {
-            collectionCell.photo.image = _photos[indexPath.row];
-        }
+    NSLog(@"\nindexPath.row == %ld\n", (long)indexPath.row);
+    
+    if ([self showNextPhotosAfterSixStartersPhotos:indexPath]) {
+        NSLog(@"\nAdding photo to up 6...\n");
+        collectionCell.photo.image = _photos[indexPath.row];
+    } else if ([self showPreviousPhotos:indexPath]) {
+        collectionCell.photo.image = _photos[indexPath.row];
+    } else if (_photos.count == 0) {
+        collectionCell.photo.image = [[UIImage alloc]init];
     }
     return collectionCell;
 }
