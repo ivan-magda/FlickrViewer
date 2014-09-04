@@ -10,6 +10,8 @@
 
 @interface CollectionViewCell : UICollectionViewCell
 
-@property (strong, nonatomic) IBOutlet UIImageView *photo;
+@property (weak, nonatomic) IBOutlet UIImageView *photo;
+
+@property (weak, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicator;
 
 @end

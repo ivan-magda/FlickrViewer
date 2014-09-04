@@ -4,5 +4,8 @@ FlickrViewer.xcodeproj/project.xcworkspace/xcuserdata/vanyaland.xcuserdatad/Work
 *.xcbkptlist
 
 FlickrViewer.xcodeproj/project.xcworkspace/xcshareddata/FlickrViewer.xccheckout
+<<<<<<< HEAD
 
 FlickrViewer/Base.lproj/Main.storyboard
+=======
+>>>>>>> develop

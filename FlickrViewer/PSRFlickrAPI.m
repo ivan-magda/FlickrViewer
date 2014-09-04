@@ -74,6 +74,4 @@ const NSString * PSRDefaultApiUrl = @"https://api.flickr.com/services/rest/?";
     return json;
 }
 
-
-
 @end

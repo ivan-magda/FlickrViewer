@@ -29,6 +29,8 @@ static const int kNumberOfPhotosThatAreVisible = 6;
     NSMutableArray *_parsedPhotosInfo;
 }
 
+#pragma mark - View Controller Life Cycle -
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -50,7 +52,11 @@ static const int kNumberOfPhotosThatAreVisible = 6;
     self.searchOptions = options;
 }
 
+#pragma mark - Processing of requests for photos -
+
 - (IBAction)showPhotos:(UIButton *)sender {
+    [self configurateSearchOptions];
+    
     _photos = [[NSMutableArray alloc]init];
     _parsedPhotosInfo = [[NSMutableArray alloc]init];
     
@@ -81,41 +87,56 @@ static const int kNumberOfPhotosThatAreVisible = 6;
         dispatch_async(mainQueue, ^{
             [_photos addObject:[UIImage imageWithData:photoData]];
             
-            NSLog(@"%@",_photos);
+            NSLog(@"images downloaded %lu",(unsigned long)_photos.count);
             
             NSIndexPath *indexPath = [NSIndexPath indexPathForItem:_photos.count - 1 inSection:0];
             
             if (indexPath.row < kNumberOfPhotosThatAreVisible) {
                 CollectionViewCell *cell = (CollectionViewCell *)[self.collectionView cellForItemAtIndexPath:indexPath];
-                NSAssert(cell, @"Cell does not exist!");
+                [cell.activityIndicator stopAnimating];
+                cell.activityIndicator.hidesWhenStopped = YES;
                 cell.photo.image = _photos[indexPath.row];
-            }
-            
+            }             
             [self showPhotosFromEnumerator:enumerator];
         });
     });
 }
 
+- (void)configurateSearchOptions {
+    NSString *itemsLimit = self.numberOfPhotosTextField.text;
+    self.searchOptions.itemsLimit = [itemsLimit intValue];
+    
+    NSArray *tags = [self.tagTextField.text componentsSeparatedByCharactersInSet:[NSCharacterSet punctuationCharacterSet]];
+    self.searchOptions.tags = tags;
+    NSLog(@"\ntags: %@ \n", tags);
+}
+
+#pragma mark - Text Field Delegate -
+
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
     [textField resignFirstResponder];
-    [self configurateSearchOptionsWithTextFiled:textField];
     
     return YES;
 }
 
-- (void)textFieldDidEndEditing:(UITextField *)textField {
-    [textField resignFirstResponder];
-    [self configurateSearchOptionsWithTextFiled:textField];
+#pragma mark - check the status of cell -
+
+- (BOOL)showNextPhotosAfterSixStartersPhotos:(NSIndexPath *)indexPath {
+    if ((indexPath.row > kNumberOfPhotosThatAreVisible - 1) &&
+        (indexPath.row < _photos.count))
+        return YES;
+    else
+        return NO;
 }
 
-- (void)configurateSearchOptionsWithTextFiled:(UITextField *)textField {
-    if (textField.keyboardType == UIKeyboardTypeNumberPad) {
-        NSString *itemsLimit = self.numberOfPhotosTextField.text;
-        self.searchOptions.itemsLimit = [itemsLimit intValue];
-    } else {
-        self.searchOptions.tags = @[self.tagTextField.text];
-    }
+- (BOOL)showPreviousPhotos:(NSIndexPath *)indexPath {
+    if ((indexPath.row < kNumberOfPhotosThatAreVisible) && _photos.count != 0)
+        return YES;
+    else
+        return NO;
 }
+
+#pragma mark - Collection View Data Source -
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
     return self.searchOptions.itemsLimit;
@@ -124,28 +145,41 @@ static const int kNumberOfPhotosThatAreVisible = 6;
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
     CollectionViewCell *collectionCell = [self.collectionView dequeueReusableCellWithReuseIdentifier:@"Cell" forIndexPath:indexPath];
+
+    NSParameterAssert(collectionCell);
     
-    if (collectionCell) {
-        if (indexPath.row > kNumberOfPhotosThatAreVisible - 1) {
-            collectionCell.photo.image = _photos[indexPath.row];
-        }
+    NSLog(@"\nindexPath.row == %ld\n", (long)indexPath.row);
+    
+    if ([self showNextPhotosAfterSixStartersPhotos:indexPath]) {
+        [collectionCell.activityIndicator stopAnimating];
+        collectionCell.activityIndicator.hidesWhenStopped = YES;
+        collectionCell.photo.image = _photos[indexPath.row];
+    } else if ([self showPreviousPhotos:indexPath]) {
+        collectionCell.activityIndicator.hidesWhenStopped = YES;
+        collectionCell.photo.image = _photos[indexPath.row];
+    } else if (_photos.count == 0) {
+        [collectionCell.activityIndicator startAnimating];
+        collectionCell.photo.image = [[UIImage alloc]init];
     }
-    
     return collectionCell;
 }
+
+#pragma mark - Collection View Delegate -
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
     [self performSegueWithIdentifier:@"ShowDetail" sender:indexPath];
 }
 
+#pragma mark - Navigation -
+
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
     if ([segue.identifier isEqualToString:@"ShowDetail"]) {
-        NSIndexPath *path = sender;
-        NSParameterAssert(path);
+        NSIndexPath *indexPath = sender;
+        NSParameterAssert(indexPath);
         
         PhotoDetailViewController *controller = segue.destinationViewController;
-        controller.photoToShowDetail = _parsedPhotosInfo[path.row];
-        controller.imageToShow = _photos[path.row];
+        controller.photoToShowDetail = _parsedPhotosInfo[indexPath.row];
+        controller.imageToShow = _photos[indexPath.row];
     }
 }
 
