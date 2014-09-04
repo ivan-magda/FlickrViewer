@@ -12,4 +12,6 @@
 
 @property (weak, nonatomic) IBOutlet UIImageView *photo;
 
+@property (weak, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicator;
+
 @end

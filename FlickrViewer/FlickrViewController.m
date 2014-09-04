@@ -93,6 +93,8 @@ static const int kNumberOfPhotosThatAreVisible = 6;
             
             if (indexPath.row < kNumberOfPhotosThatAreVisible) {
                 CollectionViewCell *cell = (CollectionViewCell *)[self.collectionView cellForItemAtIndexPath:indexPath];
+                [cell.activityIndicator stopAnimating];
+                cell.activityIndicator.hidesWhenStopped = YES;
                 cell.photo.image = _photos[indexPath.row];
             }             
             [self showPhotosFromEnumerator:enumerator];
@@ -120,7 +122,8 @@ static const int kNumberOfPhotosThatAreVisible = 6;
 #pragma mark - check the status of cell -
 
 - (BOOL)showNextPhotosAfterSixStartersPhotos:(NSIndexPath *)indexPath {
-    if ((indexPath.row > kNumberOfPhotosThatAreVisible - 1) && _photos[indexPath.row])
+    if ((indexPath.row > kNumberOfPhotosThatAreVisible - 1) &&
+        (indexPath.row < _photos.count))
         return YES;
     else
         return NO;
@@ -148,11 +151,14 @@ static const int kNumberOfPhotosThatAreVisible = 6;
     NSLog(@"\nindexPath.row == %ld\n", (long)indexPath.row);
     
     if ([self showNextPhotosAfterSixStartersPhotos:indexPath]) {
-        NSLog(@"\nAdding photo to up 6...\n");
+        [collectionCell.activityIndicator stopAnimating];
+        collectionCell.activityIndicator.hidesWhenStopped = YES;
         collectionCell.photo.image = _photos[indexPath.row];
     } else if ([self showPreviousPhotos:indexPath]) {
+        collectionCell.activityIndicator.hidesWhenStopped = YES;
         collectionCell.photo.image = _photos[indexPath.row];
     } else if (_photos.count == 0) {
+        [collectionCell.activityIndicator startAnimating];
         collectionCell.photo.image = [[UIImage alloc]init];
     }
     return collectionCell;
@@ -168,12 +174,12 @@ static const int kNumberOfPhotosThatAreVisible = 6;
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
     if ([segue.identifier isEqualToString:@"ShowDetail"]) {
-        NSIndexPath *path = sender;
-        NSParameterAssert(path);
+        NSIndexPath *indexPath = sender;
+        NSParameterAssert(indexPath);
         
         PhotoDetailViewController *controller = segue.destinationViewController;
-        controller.photoToShowDetail = _parsedPhotosInfo[path.row];
-        controller.imageToShow = _photos[path.row];
+        controller.photoToShowDetail = _parsedPhotosInfo[indexPath.row];
+        controller.imageToShow = _photos[indexPath.row];
     }
 }
 

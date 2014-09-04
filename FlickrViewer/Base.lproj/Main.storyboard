@@ -67,10 +67,15 @@
                                                     <rect key="frame" x="0.0" y="0.0" width="130" height="110"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                 </imageView>
+                                                <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="bhC-N0-MXJ">
+                                                    <rect key="frame" x="47" y="36" width="37" height="37"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                </activityIndicatorView>
                                             </subviews>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </view>
                                         <connections>
+                                            <outlet property="activityIndicator" destination="bhC-N0-MXJ" id="l4c-eu-7iA"/>
                                             <outlet property="photo" destination="iWX-jK-gu6" id="T7y-zu-VFX"/>
                                         </connections>
                                     </collectionViewCell>
