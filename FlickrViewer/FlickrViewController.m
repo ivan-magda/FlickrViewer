@@ -61,6 +61,8 @@ static const int kNumberOfPhotosThatAreVisible = 6;
     _parsedPhotosInfo = [[NSMutableArray alloc]init];
     
     dispatch_queue_t mainQueue = dispatch_get_main_queue();
+    //Здесь это не нужно, так как все события от действий пользователя с
+    //интерфесом происходят в основном потоке
     dispatch_async(mainQueue, ^{
         [self.collectionView reloadData];
     });
@@ -80,7 +82,8 @@ static const int kNumberOfPhotosThatAreVisible = 6;
             return;
         }
         [_parsedPhotosInfo addObject:parsedPhoto];
-        
+        //не стоит для ячеек качать фото высокого качества, раз пользователб не сможет их в таком качестве разглядеть
+        //используйте метод -lowQualityURL
         NSData *photoData = [NSData dataWithContentsOfURL:[parsedPhoto highQualityURL]];
         
         dispatch_queue_t mainQueue = dispatch_get_main_queue();
@@ -92,11 +95,17 @@ static const int kNumberOfPhotosThatAreVisible = 6;
             NSIndexPath *indexPath = [NSIndexPath indexPathForItem:_photos.count - 1 inSection:0];
             
             if (indexPath.row < kNumberOfPhotosThatAreVisible) {
+#warning Вам не нужно в этом месте что-то менять в ячейке. \
+В момент, когда загрузилось второе, может получиться так, \
+что пользователь находится на 10й, и первая уже не видна. \
+В данном случае вам нужно запросить у CollectionView индексы видимих ячеек \
+методом [self.collectionView indexPathsForVisibleItems]\
+и в нем уже, при необходимости обновлять ячейку.
                 CollectionViewCell *cell = (CollectionViewCell *)[self.collectionView cellForItemAtIndexPath:indexPath];
                 [cell.activityIndicator stopAnimating];
                 cell.activityIndicator.hidesWhenStopped = YES;
                 cell.photo.image = _photos[indexPath.row];
-            }             
+            }
             [self showPhotosFromEnumerator:enumerator];
         });
     });
@@ -145,7 +154,7 @@ static const int kNumberOfPhotosThatAreVisible = 6;
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
     CollectionViewCell *collectionCell = [self.collectionView dequeueReusableCellWithReuseIdentifier:@"Cell" forIndexPath:indexPath];
-
+    
     NSParameterAssert(collectionCell);
     
     NSLog(@"\nindexPath.row == %ld\n", (long)indexPath.row);
