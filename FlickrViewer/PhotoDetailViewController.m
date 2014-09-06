@@ -18,6 +18,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    // Вот тут уже можно в фоне скачать фото в хорошем качестве.
     // Do any additional setup after loading the view.
 }
 
@@ -29,6 +30,7 @@
     [super viewDidAppear:animated];
     
     NSParameterAssert(self.imageToShow);
+    //присвоение изображений лучше переместить  во  viewDidLoad т.к. это нужно сделать только один раз
     self.photo.image = self.imageToShow;
     
     NSLog(@"%@",self.photoToShowDetail.info);
@@ -50,7 +52,7 @@
             break;
     }
 }
-
+//прикольная анимация! Круто!!
 - (void)animateView1 {
     self.photo.alpha = 0.;
     self.textLabel.alpha = 0.;
