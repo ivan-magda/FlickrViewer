@@ -26,7 +26,7 @@ static const int kNumberOfPhotosThatAreVisible = 6;
 
 @implementation FlickrViewController {
     NSMutableArray *_photos;
-    NSMutableArray *_parsedPhotosInfo;
+    NSMutableArray *_parsedPhotos;
 }
 
 #pragma mark - View Controller Life Cycle -
@@ -54,24 +54,49 @@ static const int kNumberOfPhotosThatAreVisible = 6;
 
 #pragma mark - Processing of requests for photos -
 
+- (void)configurateSearchOptions {
+    NSString *itemsLimit = self.numberOfPhotosTextField.text;
+    self.searchOptions.itemsLimit = [itemsLimit intValue];
+    
+    NSArray *tags = [self.tagTextField.text componentsSeparatedByCharactersInSet:[NSCharacterSet punctuationCharacterSet]];
+    self.searchOptions.tags = tags;
+    NSLog(@"\ntags: %@ \n", tags);
+}
+
 - (IBAction)showPhotos:(UIButton *)sender {
     [self configurateSearchOptions];
     
     _photos = [[NSMutableArray alloc]init];
-    _parsedPhotosInfo = [[NSMutableArray alloc]init];
+    _parsedPhotos = [[NSMutableArray alloc]init];
     
-    dispatch_queue_t mainQueue = dispatch_get_main_queue();
-    //Здесь это не нужно, так как все события от действий пользователя с
+    //все события от действий пользователя с
     //интерфесом происходят в основном потоке
-    dispatch_async(mainQueue, ^{
-        [self.collectionView reloadData];
-    });
+    [self.collectionView reloadData];
     
     PSRClassWichPerformsSomethingWithComplitionBlock *customClassWithComplition = [PSRClassWichPerformsSomethingWithComplitionBlock new];
     
     [customClassWithComplition performSomeOperationWithSearchOptions:self.searchOptions complition:^(id result) {
         [self showPhotosFromEnumerator:[result objectEnumerator]];
     }];
+}
+
+- (BOOL)checkIndexOfVisibleItemForAddingImageWith:(NSIndexPath *)indexPathForDownloadedImage {
+    NSArray *indexPathForVisibleItems = [self.collectionView indexPathsForVisibleItems];
+    NSSet *set = [NSSet setWithArray:indexPathForVisibleItems];
+    
+    return ([set member:indexPathForDownloadedImage] ? YES : NO);
+}
+
+- (void)addDownloadedImageToCollectionItem {
+    NSIndexPath *indexPath = [NSIndexPath indexPathForItem:_photos.count - 1 inSection:0];
+    
+    if ([self checkIndexOfVisibleItemForAddingImageWith:indexPath]) {
+        
+        CollectionViewCell *cell = (CollectionViewCell *)[self.collectionView cellForItemAtIndexPath:indexPath];
+        [cell.activityIndicator stopAnimating];
+        cell.activityIndicator.hidesWhenStopped = YES;
+        cell.photo.image = _photos[indexPath.row];
+    }
 }
 
 - (void)showPhotosFromEnumerator:(NSEnumerator *)enumerator {
@@ -81,43 +106,20 @@ static const int kNumberOfPhotosThatAreVisible = 6;
         if (!parsedPhoto){
             return;
         }
-        [_parsedPhotosInfo addObject:parsedPhoto];
-        //не стоит для ячеек качать фото высокого качества, раз пользователб не сможет их в таком качестве разглядеть
-        //используйте метод -lowQualityURL
-        NSData *photoData = [NSData dataWithContentsOfURL:[parsedPhoto highQualityURL]];
+        [_parsedPhotos addObject:parsedPhoto];
+
+        NSData *photoData = [NSData dataWithContentsOfURL:[parsedPhoto lowQualityURL]];
         
-        dispatch_queue_t mainQueue = dispatch_get_main_queue();
-        dispatch_async(mainQueue, ^{
+        dispatch_async(dispatch_get_main_queue(), ^{
             [_photos addObject:[UIImage imageWithData:photoData]];
             
             NSLog(@"images downloaded %lu",(unsigned long)_photos.count);
             
-            NSIndexPath *indexPath = [NSIndexPath indexPathForItem:_photos.count - 1 inSection:0];
+            [self addDownloadedImageToCollectionItem];
             
-            if (indexPath.row < kNumberOfPhotosThatAreVisible) {
-#warning Вам не нужно в этом месте что-то менять в ячейке. \
-В момент, когда загрузилось второе, может получиться так, \
-что пользователь находится на 10й, и первая уже не видна. \
-В данном случае вам нужно запросить у CollectionView индексы видимих ячеек \
-методом [self.collectionView indexPathsForVisibleItems]\
-и в нем уже, при необходимости обновлять ячейку.
-                CollectionViewCell *cell = (CollectionViewCell *)[self.collectionView cellForItemAtIndexPath:indexPath];
-                [cell.activityIndicator stopAnimating];
-                cell.activityIndicator.hidesWhenStopped = YES;
-                cell.photo.image = _photos[indexPath.row];
-            }
             [self showPhotosFromEnumerator:enumerator];
         });
     });
-}
-
-- (void)configurateSearchOptions {
-    NSString *itemsLimit = self.numberOfPhotosTextField.text;
-    self.searchOptions.itemsLimit = [itemsLimit intValue];
-    
-    NSArray *tags = [self.tagTextField.text componentsSeparatedByCharactersInSet:[NSCharacterSet punctuationCharacterSet]];
-    self.searchOptions.tags = tags;
-    NSLog(@"\ntags: %@ \n", tags);
 }
 
 #pragma mark - Text Field Delegate -
@@ -159,14 +161,19 @@ static const int kNumberOfPhotosThatAreVisible = 6;
     
     NSLog(@"\nindexPath.row == %ld\n", (long)indexPath.row);
     
-    if ([self showNextPhotosAfterSixStartersPhotos:indexPath]) {
+    if ([self showNextPhotosAfterSixStartersPhotos:indexPath])
+    {
         [collectionCell.activityIndicator stopAnimating];
         collectionCell.activityIndicator.hidesWhenStopped = YES;
         collectionCell.photo.image = _photos[indexPath.row];
-    } else if ([self showPreviousPhotos:indexPath]) {
+    }
+    else if ([self showPreviousPhotos:indexPath])
+    {
         collectionCell.activityIndicator.hidesWhenStopped = YES;
         collectionCell.photo.image = _photos[indexPath.row];
-    } else if (_photos.count == 0) {
+    }
+    else if (_photos.count == 0)
+    {
         [collectionCell.activityIndicator startAnimating];
         collectionCell.photo.image = [[UIImage alloc]init];
     }
@@ -187,8 +194,7 @@ static const int kNumberOfPhotosThatAreVisible = 6;
         NSParameterAssert(indexPath);
         
         PhotoDetailViewController *controller = segue.destinationViewController;
-        controller.photoToShowDetail = _parsedPhotosInfo[indexPath.row];
-        controller.imageToShow = _photos[indexPath.row];
+        controller.photoToShowDetail = _parsedPhotos[indexPath.row];
     }
 }
 
