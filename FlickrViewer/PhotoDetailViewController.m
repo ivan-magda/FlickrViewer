@@ -60,10 +60,10 @@
     int randomAnimate = arc4random_uniform(2) + 1;
     switch (randomAnimate) {
         case 1:
-            [self animateView1];
+            [self lightAppearance];
             break;
         case 2:
-            [self animateView2];
+            [self increaseFromCenter];
             break;
         default:
             NSParameterAssert(NO);
@@ -71,7 +71,7 @@
     }
 }
 
-- (void)animateView1 {
+- (void)lightAppearance {
     self.photo.alpha = 0.;
     self.textLabel.alpha = 0.;
     
@@ -85,7 +85,7 @@
                      }];
 }
 
-- (void)animateView2 {
+- (void)increaseFromCenter {
     CGRect photoFrame = self.photo.frame;
     photoFrame.origin.x = 160;
     photoFrame.origin.y = 225;

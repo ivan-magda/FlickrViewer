@@ -69,8 +69,6 @@ static const int kNumberOfPhotosThatAreVisible = 6;
     _photos = [[NSMutableArray alloc]init];
     _parsedPhotos = [[NSMutableArray alloc]init];
     
-    //все события от действий пользователя с
-    //интерфесом происходят в основном потоке
     [self.collectionView reloadData];
     
     PSRClassWichPerformsSomethingWithComplitionBlock *customClassWithComplition = [PSRClassWichPerformsSomethingWithComplitionBlock new];
@@ -147,6 +145,11 @@ static const int kNumberOfPhotosThatAreVisible = 6;
         return NO;
 }
 
+- (BOOL)newRequestForPhotos {
+    return ((_photos.count == 0) ? YES : NO);
+}
+
+
 #pragma mark - Collection View Data Source -
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
@@ -172,7 +175,7 @@ static const int kNumberOfPhotosThatAreVisible = 6;
         collectionCell.activityIndicator.hidesWhenStopped = YES;
         collectionCell.photo.image = _photos[indexPath.row];
     }
-    else if (_photos.count == 0)
+    else if ([self newRequestForPhotos])
     {
         [collectionCell.activityIndicator startAnimating];
         collectionCell.photo.image = [[UIImage alloc]init];
