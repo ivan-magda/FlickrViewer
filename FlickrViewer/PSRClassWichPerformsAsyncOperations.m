@@ -29,8 +29,7 @@
         
         NSLog(@"Request made");
         
-        dispatch_queue_t mainQueue = dispatch_get_main_queue();
-        dispatch_async(mainQueue, ^{
+        dispatch_async(dispatch_get_main_queue(), ^{
             if (copiedComplition){
                 copiedComplition(photos);
             }

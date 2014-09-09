@@ -119,11 +119,16 @@
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="oY2-y0-EUa">
+                                <rect key="frame" x="142" y="206" width="37" height="37"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            </activityIndicatorView>
                         </subviews>
                         <color key="backgroundColor" red="0.41568627450000001" green="0.86274509799999999" blue="0.85882352939999995" alpha="1" colorSpace="calibratedRGB"/>
                     </view>
                     <navigationItem key="navigationItem" id="6em-BF-fXj"/>
                     <connections>
+                        <outlet property="activityIndicator" destination="oY2-y0-EUa" id="8tp-Gn-yzo"/>
                         <outlet property="photo" destination="p8s-cl-tWH" id="z2j-po-v1Y"/>
                         <outlet property="textLabel" destination="EJi-IM-vlJ" id="A6g-4n-v5L"/>
                     </connections>

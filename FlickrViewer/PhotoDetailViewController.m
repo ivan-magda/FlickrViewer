@@ -15,45 +15,63 @@
 
 @implementation PhotoDetailViewController
 
+
+#pragma mark - ViewControllerLifeCycle -
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    // Вот тут уже можно в фоне скачать фото в хорошем качестве.
-    // Do any additional setup after loading the view.
+    
+    [self setUpWithTitleAndImageDownload];
 }
 
-- (void)viewWillAppear:(BOOL)animated {
-    [super viewWillAppear:animated];
+#pragma mark - Custom methods - 
+
+- (void)setUpWithTitleAndImageDownload {
+    [self.activityIndicator startAnimating];
+    
+    dispatch_queue_t downloadQueue = dispatch_queue_create("download queu", 0);
+    dispatch_async(downloadQueue, ^{
+        NSData *photoData = [NSData dataWithContentsOfURL:[self.photoToShowDetail highQualityURL]];
+        if (photoData)
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                UIImage *image = [UIImage imageWithData:photoData];
+                NSParameterAssert(image);
+                self.photo.image = image;
+                
+                [self.activityIndicator stopAnimating];
+                self.activityIndicator.hidesWhenStopped = YES;
+                
+                NSLog(@"%@",self.photoToShowDetail.info);
+                NSString *title = [self.photoToShowDetail.info objectForKey:@"title"];
+                NSParameterAssert(title);
+                self.textLabel.text = title;
+                
+                [self randomAnimate];
+            });
+        }
+    });
 }
 
-- (void)viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:animated];
-    
-    NSParameterAssert(self.imageToShow);
-    //присвоение изображений лучше переместить  во  viewDidLoad т.к. это нужно сделать только один раз
-    self.photo.image = self.imageToShow;
-    
-    NSLog(@"%@",self.photoToShowDetail.info);
-    NSString *title = [self.photoToShowDetail.info objectForKey:@"title"];
-    NSParameterAssert(title);
-    
-    self.textLabel.text = title;
-    
+#pragma mark - Animations -
+
+- (void)randomAnimate {
     int randomAnimate = arc4random_uniform(2) + 1;
     switch (randomAnimate) {
         case 1:
-            [self animateView1];
+            [self lightAppearance];
             break;
         case 2:
-            [self animateView2];
+            [self increaseFromCenter];
             break;
         default:
             NSParameterAssert(NO);
             break;
     }
 }
-//прикольная анимация! Круто!!
-- (void)animateView1 {
+
+- (void)lightAppearance {
     self.photo.alpha = 0.;
     self.textLabel.alpha = 0.;
     
@@ -67,7 +85,7 @@
                      }];
 }
 
-- (void)animateView2 {
+- (void)increaseFromCenter {
     CGRect photoFrame = self.photo.frame;
     photoFrame.origin.x = 160;
     photoFrame.origin.y = 225;

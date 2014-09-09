@@ -13,10 +13,9 @@
 @interface PhotoDetailViewController : UIViewController
 
 @property (weak, nonatomic) IBOutlet UIImageView *photo;
-
 @property (weak, nonatomic) IBOutlet UILabel *textLabel;
+@property (weak, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicator;
 
 @property (nonatomic, strong) PSRFlickrPhoto *photoToShowDetail;
-@property (nonatomic, strong) UIImage *imageToShow;
 
 @end
