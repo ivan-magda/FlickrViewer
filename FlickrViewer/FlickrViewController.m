@@ -52,13 +52,53 @@ static const int kNumberOfPhotosThatAreVisible = 6;
     self.searchOptions = options;
 }
 
+#pragma mark - Changing Size of the CollectionViewCell -
+
+- (void)setCollectionViewCellSizeAnimatedWith:(NSTimeInterval)duration {
+    if (_photos.count != 0) {
+        self.collectionView.alpha = 0;
+        self.searchButton.alpha = 0;
+        self.tagsTextField.alpha = 0;
+        self.numberOfPhotosTextField.alpha = 0;
+        [UIView animateWithDuration:0.5
+                              delay:duration
+                            options:UIViewAnimationOptionCurveEaseInOut
+                         animations:^{
+                             [self.collectionView reloadData];
+                             
+                             self.collectionView.alpha = 1;
+                             self.searchButton.alpha = 1;
+                             self.tagsTextField.alpha = 1;
+                             self.numberOfPhotosTextField.alpha = 1;
+                         } completion:^(BOOL finished) {
+                             finished = YES;
+                         }];
+    }
+}
+
+- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
+{
+    [self setCollectionViewCellSizeAnimatedWith:duration];
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    UIInterfaceOrientation orientation = [self interfaceOrientation];
+    if (orientation == UIDeviceOrientationLandscapeRight ||
+        orientation == UIDeviceOrientationLandscapeLeft)
+    {
+        return CGSizeMake(165, 115);
+    }
+    return CGSizeMake(130, 115);
+}
+
 #pragma mark - Processing of requests for photos -
 
 - (void)configurateSearchOptions {
     NSString *itemsLimit = self.numberOfPhotosTextField.text;
     self.searchOptions.itemsLimit = [itemsLimit intValue];
     
-    NSArray *tags = [self.tagTextField.text componentsSeparatedByCharactersInSet:[NSCharacterSet punctuationCharacterSet]];
+    NSArray *tags = [self.tagsTextField.text componentsSeparatedByCharactersInSet:[NSCharacterSet punctuationCharacterSet]];
     self.searchOptions.tags = tags;
     NSLog(@"\ntags: %@ \n", tags);
 }
@@ -172,6 +212,7 @@ static const int kNumberOfPhotosThatAreVisible = 6;
     }
     else if ([self showPreviousPhotos:indexPath])
     {
+        [collectionCell.activityIndicator stopAnimating];
         collectionCell.activityIndicator.hidesWhenStopped = YES;
         collectionCell.photo.image = _photos[indexPath.row];
     }
