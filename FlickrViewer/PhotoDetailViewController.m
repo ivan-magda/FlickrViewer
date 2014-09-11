@@ -22,6 +22,8 @@
 {
     [super viewDidLoad];
     
+    self.textLabel.text = @"";
+    
     [self setUpWithTitleAndImageDownload];
 }
 
@@ -76,7 +78,8 @@
     self.textLabel.alpha = 0.;
     
     [UIView animateWithDuration:0.75
-                          delay:0 options:UIViewAnimationOptionCurveEaseInOut
+                          delay:0
+                        options:UIViewAnimationOptionCurveEaseInOut
                      animations:^{
                          self.photo.alpha = 1.;
                          self.textLabel.alpha = 1.;
@@ -86,6 +89,7 @@
 }
 
 - (void)increaseFromCenter {
+    CGRect originalPhotoFrame = self.photo.frame;
     CGRect photoFrame = self.photo.frame;
     photoFrame.origin.x = 160;
     photoFrame.origin.y = 225;
@@ -94,6 +98,7 @@
     
     self.photo.frame = photoFrame;
     
+    CGRect originalTextLabelFrame = self.textLabel.frame;
     CGRect textLabelFrame = self.textLabel.frame;
     textLabelFrame.origin.x = 300;
     textLabelFrame.origin.y = 467;
@@ -106,19 +111,8 @@
                           delay:0
                         options:UIViewAnimationOptionCurveEaseIn
                      animations:^{
-                         CGRect pFrame = self.photo.frame;
-                         pFrame.origin.x = 0;
-                         pFrame.origin.y = 70;
-                         pFrame.size.width = 320;
-                         pFrame.size.height = 310;
-                         self.photo.frame = pFrame;
-                         
-                         CGRect tFrame = self.textLabel.frame;
-                         tFrame.origin.x = 20;
-                         tFrame.origin.y = 386;
-                         tFrame.size.width = 280;
-                         tFrame.size.height = 162;
-                         self.textLabel.frame = tFrame;
+                         self.photo.frame = originalPhotoFrame;
+                         self.textLabel.frame = originalTextLabelFrame;
                      } completion:^(BOOL finished) {
                          finished = YES;
                      }];
